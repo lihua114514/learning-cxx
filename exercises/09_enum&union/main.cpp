@@ -5,7 +5,8 @@
 // `enum` 是 C 的兼容类型，本质上其对应类型的常量。
 // 在 `enum` 中定义标识符等价于定义 constexpr 常量，
 // 这些标识符不需要前缀，可以直接引用。
-// 因此 `enum` 定义会污染命名空间。
+// 因此 `enum` 定义会污染命名空间。+++  +
+
 enum ColorEnum : unsigned char {
     COLOR_RED = 31,
     COLOR_GREEN,
@@ -37,7 +38,7 @@ ColorEnum convert_by_pun(Color c) {
 
     TypePun pun;
     // TODO: 补全类型双关转换
-
+    pun.e=(ColorEnum)c;
     return pun.e;
 }
 
