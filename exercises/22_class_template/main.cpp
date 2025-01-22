@@ -1,5 +1,5 @@
 ﻿#include "../exercise.h"
-
+#include <cstring>
 // READ: 类模板 <https://zh.cppreference.com/w/cpp/language/class_template>
 
 template<class T>
@@ -8,8 +8,11 @@ struct Tensor4D {
     T *data;
 
     Tensor4D(unsigned int const shape_[4], T const *data_) {
-        unsigned int size = 1;
-        // TODO: 填入正确的 shape 并计算 size
+          for (int i = 0; i < 4; ++i) {
+            shape[i] = shape_[i];
+        }
+
+        unsigned int size = shape[0] * shape[1] * shape[2] * shape[3];
         data = new T[size];
         std::memcpy(data, data_, size * sizeof(T));
     }
@@ -26,10 +29,54 @@ struct Tensor4D {
     // `others` 长度为 1 但 `this` 长度不为 1 的维度将发生广播计算。
     // 例如，`this` 形状为 `[1, 2, 3, 4]`，`others` 形状为 `[1, 2, 1, 4]`，
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
-    Tensor4D &operator+=(Tensor4D const &others) {
-        // TODO: 实现单向广播的加法
-        return *this;
+    // 广播加法操作 
+
+Tensor4D &operator+=(Tensor4D const &others) {
+    // 计算广播后的 size
+    unsigned int size = 1;
+    for (int i = 0; i < 4; ++i) {
+        size *= std::max(this->shape[i], others.shape[i]);
     }
+
+    // 确定哪些维度需要广播
+    bool broadcast[4] = {false};
+    for (int i = 0; i < 4; ++i) {
+        if (this->shape[i] != others.shape[i]) {
+            ASSERT(others.shape[i] == 1, "Broadcast shape must be 1 on mismatched dimensions");
+            broadcast[i] = true;
+        }
+    }
+
+    // 指针初始化
+    auto src = others.data;
+    auto dst = this->data;
+    
+    // 为每个维度创建指针标记
+    T *mark[4] = {src};
+    for (int i0 = 0u; i0 < this->shape[0]; ++i0) {
+        if (broadcast[0]) src = mark[0];
+        mark[1] = src;
+        for (int i1 = 0u; i1 < this->shape[1]; ++i1) {
+            if (broadcast[1]) src = mark[1];
+            mark[2] = src;
+            for (int i2 = 0u; i2 < this->shape[2]; ++i2) {
+                if (broadcast[2]) src = mark[2];
+                mark[3] = src;
+                for (int i3 = 0u; i3 < this->shape[3]; ++i3) {
+                    if (broadcast[3]) src = mark[3];
+
+                    // 执行加法并递增指针
+                    *dst++ += *src++;
+                }
+            }
+        }
+    }
+
+    return *this;
+}
+
+
+
 };
 
 // ---- 不要修改以下代码 ----

@@ -1,5 +1,6 @@
 ﻿#include "../exercise.h"
 #include <numeric>
+#include <vector>
 
 // READ: `std::accumulate` <https://zh.cppreference.com/w/cpp/algorithm/accumulate>
 
@@ -11,7 +12,9 @@ int main(int argc, char **argv) {
     //       - 形状为 shape；
     //       - 连续存储；
     //       的张量占用的字节数
-    // int size =
+    int size =std::accumulate(shape,shape+4,1,std::multiplies<float>());
+    size *= sizeof(DataType);
+    //std::cout<<size<<std::endl;
     ASSERT(size == 602112, "4x1x3x224x224 = 602112");
     return 0;
 }
